@@ -1,0 +1,21 @@
+{
+    "manifest_version": 3,
+    "name": "Daily Productivity Log",
+    "version": "0.1.0",
+    "description": "Track your daily productivity and get tips on how to improve it.",
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "permissions": [
+        "storage"
+    ],
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["content.js"]
+        }
+    ],
+    "background": {
+        "service_worker": "background.js"
+    }
+}

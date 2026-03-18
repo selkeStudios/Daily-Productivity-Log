@@ -13,3 +13,6 @@
 - Color scheme: light theme with green/red for productive/unproductive
 - Top section: total browsing time, productivity score
 - Bottom section: top 5 visited sites with time bars
+- Settings page: toggle email reports, customize site categories
+- Data deletion button for privacy-conscious users
+- Responsive font sizes for readability

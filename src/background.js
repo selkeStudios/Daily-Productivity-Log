@@ -1,16 +1,7 @@
-"use strict"
+// Entry point for the background service worker.
+// Delegates real work to controller modules to keep things modular.
 
-function setBadgeText(enabled) {
-    const text = enabled ? "ON" : "OFF"
-    void chrome.action.setBadgeText({text: text})
-}
+import { Lifecycle } from "./controllers/lifecycle.js"
 
-function startUp() {
-    chrome.storage.sync.get("enabled", (data) => {
-        setBadgeText(!!data.enabled)
-    })
-}
-
-// Ensure the background script always runs.
-chrome.runtime.onStartup.addListener(startUp)
-chrome.runtime.onInstalled.addListener(startUp)
+// Kick everything off
+Lifecycle.registerListeners()

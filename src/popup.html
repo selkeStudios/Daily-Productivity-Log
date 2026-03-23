@@ -1,14 +1,17 @@
-<hmtl lang="en">
-<head>
-    <title>Daily Productivity Log</title>
-    <link rel="stylesheet" type="text/css" href="popup.css">
-</head>
-<body>
-<label class="switch">
-    <input id="enabled" type="checkbox">
-    <span class="slider round"></span>
-</label>
-<input class="secret" id="item" type="text">
-<script src="popup.js"></script>
-</body>
-</hmtl>
+<!doctype html>
+<html lang = "en">
+  <head>
+    <title>Recently Typed URLs</title>
+    <style>
+      body {
+        min-width: 250px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h2>Recently Typed URLs:</h2>
+    <script src="popup.js"></script>
+    <div id="typedUrl_div"></div>
+  </body>
+</html>

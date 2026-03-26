@@ -1,17 +1,21 @@
 <!doctype html>
 <html lang = "en">
   <head>
-    <title>Recently Typed URLs</title>
+    <title>Gander</title>
     <style>
       body {
-        min-width: 250px;
+        min-width: 300px;
+        font-family:'sans-serif';
+        padding: 10px;
       }
+      h2 { color: #2196F3; font-size: 1.2rem; }
+      ul { list-style: none; padding: 0; }
     </style>
   </head>
 
   <body>
-    <h2>Recently Typed URLs:</h2>
+    <h2>Time Spent (Last 24h)</h2>
+    <div id="typedUrl_div">Calculating...</div>
     <script src="popup.js"></script>
-    <div id="typedUrl_div"></div>
   </body>
 </html>

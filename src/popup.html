@@ -1,14 +1,21 @@
-<hmtl lang="en">
-<head>
-    <title>Daily Productivity Log</title>
-    <link rel="stylesheet" type="text/css" href="popup.css">
-</head>
-<body>
-<label class="switch">
-    <input id="enabled" type="checkbox">
-    <span class="slider round"></span>
-</label>
-<input class="secret" id="item" type="text">
-<script src="popup.js"></script>
-</body>
-</hmtl>
+<!doctype html>
+<html lang = "en">
+  <head>
+    <title>Gander</title>
+    <style>
+      body {
+        min-width: 300px;
+        font-family:'sans-serif';
+        padding: 10px;
+      }
+      h2 { color: #2196F3; font-size: 1.2rem; }
+      ul { list-style: none; padding: 0; }
+    </style>
+  </head>
+
+  <body>
+    <h2>Time Spent (Last 24h)</h2>
+    <div id="typedUrl_div">Calculating...</div>
+    <script src="popup.js"></script>
+  </body>
+</html>

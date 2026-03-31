@@ -19,12 +19,8 @@
         "128": "icons/icon128.png"
     },
     "permissions": [
-        "history",
-        "storage",
-        "tabs",
-        "alarms"
+        "storage"
     ],
-    "host_permissions": ["<all_urls>"],
     "content_scripts": [
         {
             "matches": ["<all_urls>"],
@@ -32,7 +28,6 @@
         }
     ],
     "background": {
-        "service_worker": "background.js",
-        "type": "module"
+        "service_worker": "background.js"
     }
 }

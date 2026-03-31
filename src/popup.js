@@ -52,3 +52,7 @@ function calculateTimeSpent(divName) {
 document.addEventListener('DOMContentLoaded', function () {
     calculateTimeSpent('typedUrl_div');
 });
+
+document.getElementById("sendEmail").addEventListener("click", () => {
+    chrome.runtime.sendMessage({ action: "SEND_EMAIL" })
+  })

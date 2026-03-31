@@ -1,4 +1,5 @@
 "use strict"
+import { sendDailyProductivityEmail } from "./services/emailService.js"
 
 import { Lifecycle } from "./controllers/lifecycle.js"
 
@@ -88,3 +89,14 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 //Schedule the alarm for when the service worker starts
 scheduleDailyLog()
+
+// Ensure the background script always runs.
+chrome.runtime.onStartup.addListener(startUp)
+chrome.runtime.onInstalled.addListener(startUp)
+
+// Message from popup
+chrome.runtime.onMessage.addListener((message) => {
+    if (message.action === "SEND_EMAIL") {
+        sendDailyProductivityEmail()
+    }
+})

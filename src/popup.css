@@ -1,20 +1,17 @@
-/* The switch - the box around the slider */
 .switch {
-    margin-left: 30%; /* Center the switch */
+    margin-left: 30%; 
     position: relative;
     display: inline-block;
     width: 60px;
     height: 34px;
 }
 
-/* Hide default HTML checkbox */
 .switch input {
     opacity: 0;
     width: 0;
     height: 0;
 }
 
-/* The slider */
 .slider {
     position: absolute;
     cursor: pointer;
@@ -40,7 +37,7 @@ input:checked + .slider {
 }
 
 input:checked + .slider:before {
-    transform: translateX(26px); /* Move the slider to the right when checked */
+    transform: translateX(26px);
 }
 
 /* Rounded sliders */

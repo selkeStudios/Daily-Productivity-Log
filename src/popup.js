@@ -28,41 +28,23 @@ function buildPopupDom(divName, sortedDomains) {
 }
 
 function calculateTimeSpent(divName) {
-    const oneDayAgo = new Date().getTime() - (24 * 60 * 60 * 1000);
-    const IDLE_THRESHOLD = 30 * 60 * 1000;
+    chrome.storage.local.get(['productivityData', 'lastUpdated'], (result) => {
+        const sortedDomains = result.productivityData || [];
+        const lastUpdated = result.lastUpdated;
 
-    chrome.history.search({
-        text: '',
-        startTime: oneDayAgo,
-        maxResults: 10000 
-    }, (historyItems) => {
-        //Sort history items by time (oldest to newest)
-        historyItems.sort((a, b) => a.lastVisitTime - b.lastVisitTime);
-
-        const domainTimes = {};
-
-        for (let i = 0; i < historyItems.length - 1; i++) {
-            const current = historyItems[i];
-            const next = historyItems[i + 1];
-            const duration = next.lastVisitTime - current.lastVisitTime;
-
-            //Only count if the gap is less than our idle threshold
-            if (duration < IDLE_THRESHOLD) {
-                try {
-                    const url = new URL(current.url);
-                    const domain = url.hostname;
-                    domainTimes[domain] = (domainTimes[domain] || 0) + duration;
-                } catch (e) {
-                    console.error("Invalid URL:", current.url);
-                }
-            }
+        //Update the title with the date
+        if (lastUpdated) {
+            const date = new Date(lastUpdated);
+            const dateString = `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear()}`;
+            document.querySelector('h2').textContent = `${dateString}`;
         }
 
-        //Convert object to array and sort by duration (descending)
-        const sortedDomains = Object.entries(domainTimes)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 15); // Show top 15 sites
-
+        //Check if data is recent (within last 24 hours)
+        if (!lastUpdated || (Date.now() - lastUpdated) > (24 * 60 * 60 * 1000)) {
+            //Data is stale, show a message
+            document.getElementById(divName).innerText = "Data not available. Please wait for daily update.";
+            return;
+        }
         buildPopupDom(divName, sortedDomains);
     });
 }

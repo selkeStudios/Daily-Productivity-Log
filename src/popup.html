@@ -1,21 +1,41 @@
 <!doctype html>
-<html lang = "en">
+<html lang="en">
   <head>
     <title>Gander</title>
-    <style>
-      body {
-        min-width: 300px;
-        font-family:'sans-serif';
-        padding: 10px;
-      }
-      h2 { color: #2196F3; font-size: 1.2rem; }
-      ul { list-style: none; padding: 0; }
-    </style>
+
+    <!--App header with title and description-->>
+    <link rel="stylesheet" href="popup.css">
   </head>
 
   <body>
-    <h2>Time Spent (Last 24h)</h2>
-    <div id="typedUrl_div">Calculating...</div>
+    <div class="header">
+      <h2>Gander</h2>
+      <span class="subtitle">Productivity Tracker</span>
+    </div>
+
+     <!-- Browsing history time breakdown -->
+    <div class="section">
+      <h3>Time Spent (Last 24h)</h3>
+      <div id="typedUrl_div">Calculating...</div>
+    </div>
+
+
+    <!-- Quick overview stats -->
+    <div class="section">
+      <h3>Quick Stats</h3>
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-number" id="totalSites">--</div>
+          <div class="stat-label">Sites</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number" id="totalTime">--</div>
+          <div class="stat-label">Total</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Email report trigger -->
     <button id="sendEmail">Send Report</button>
     <script src="popup.js"></script>
   </body>

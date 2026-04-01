@@ -10,7 +10,23 @@ def formatTime(ms):
     Python version of the formatTime function from popup.js
     Converts milliseconds into readable 'Xh Xm Xs' format
     """
-    return ""
+    # Check input type
+    if not isinstance(ms, (int, float)):
+        raise TypeError("Input must be a number")
+    # Check for negative values
+    if ms < 0:
+        raise ValueError("Input must be non-negative")
+
+    # Convert ms to hours, minutes, seconds
+    seconds = int((ms / 1000) % 60)
+    minutes = int((ms / (1000 * 60)) % 60)
+    hours = int(ms / (1000 * 60 * 60))
+
+    # Format output string
+    if hours > 0:
+        return f"{hours}h {minutes}m {seconds}s"
+    else:
+        return f"{minutes}m {seconds}s"
 
 
 # Basic conversion tests 

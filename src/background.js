@@ -3,6 +3,8 @@ import { sendDailyProductivityEmail } from "./services/emailService.js"
 
 import { Lifecycle } from "./controllers/lifecycle.js"
 
+import { summarizeByCategory, generateRecommendations } from "./services/recommendationService.js"
+
 // Kick everything off
 Lifecycle.registerListeners()
 
@@ -46,13 +48,19 @@ function calculateTimeSpent() {
         }
 
         //Convert object to array and sort by duration (descending)
-        const sortedDomains = Object.entries(domainTimes)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 15); // Show top 15 sites
+        const allDomains = Object.entries(domainTimes)
+            .sort((a, b) => b[1] - a[1]);
+
+        const sortedDomains = allDomains.slice(0, 15); // Show top 15 sites
+
+        const categorySummary = summarizeByCategory(allDomains);
+        const recommendations = generateRecommendations(categorySummary);
 
         //Store the data for the popup to use
         chrome.storage.local.set({
             productivityData: sortedDomains,
+            categorySummary: categorySummary,
+            recommendations: recommendations,
             lastUpdated: Date.now()
         });
 
@@ -60,6 +68,16 @@ function calculateTimeSpent() {
         console.log("Daily Productivity Log - Top 15 sites:");
         sortedDomains.forEach(([domain, duration]) => {
             console.log(`${domain}: ${formatTime(duration)}`);
+        });
+
+        console.log("Category Summary:");
+        console.log("Productive:", formatTime(categorySummary.productiveTime));
+        console.log("Unproductive:", formatTime(categorySummary.unproductiveTime));
+        console.log("Neutral:", formatTime(categorySummary.neutralTime));
+
+        console.log("Recommendations:");
+        recommendations.forEach((item) => {
+            console.log("- " + item);
         });
 
         if (sortedDomains.length === 0) {
@@ -86,6 +104,9 @@ chrome.alarms.onAlarm.addListener((alarm) => {
         calculateTimeSpent();
     }
 });
+
+// Run once when the service worker starts so popup data is available during testing
+calculateTimeSpent();
 
 //Schedule the alarm for when the service worker starts
 scheduleDailyLog()

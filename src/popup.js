@@ -27,32 +27,80 @@ function buildPopupDom(divName, sortedDomains) {
     }
 }
 
-function calculateTimeSpent(divName) {
-    chrome.storage.local.get(['productivityData', 'lastUpdated'], (result) => {
-        const sortedDomains = result.productivityData || [];
-        const lastUpdated = result.lastUpdated;
+function buildSummaryDom(summary) {
+    const summaryDiv = document.getElementById("summary_div");
 
-        //Update the title with the date
-        if (lastUpdated) {
-            const date = new Date(lastUpdated);
-            const dateString = `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear()}`;
-            document.querySelector('h2').textContent = `${dateString}`;
-        }
+    if (!summary) {
+        summaryDiv.innerText = "Summary not available yet.";
+        return;
+    }
 
-        //Check if data is recent (within last 24 hours)
-        if (!lastUpdated || (Date.now() - lastUpdated) > (24 * 60 * 60 * 1000)) {
-            //Data is stale, show a message
-            document.getElementById(divName).innerText = "Data not available. Please wait for daily update.";
-            return;
-        }
-        buildPopupDom(divName, sortedDomains);
+    summaryDiv.innerHTML = `
+        <div><strong>Productive:</strong> ${formatTime(summary.productiveTime)}</div>
+        <div><strong>Unproductive:</strong> ${formatTime(summary.unproductiveTime)}</div>
+        <div><strong>Neutral:</strong> ${formatTime(summary.neutralTime)}</div>
+    `;
+}
+
+function buildRecommendationDom(recommendations) {
+    const recommendationDiv = document.getElementById("recommendation_div");
+    recommendationDiv.innerHTML = "";
+
+    if (!recommendations || recommendations.length === 0) {
+        recommendationDiv.innerText = "No recommendations available yet.";
+        return;
+    }
+
+    let ul = document.createElement("ul");
+    recommendationDiv.appendChild(ul);
+
+    recommendations.forEach((item) => {
+        let li = document.createElement("li");
+        li.style.marginBottom = "8px";
+        li.textContent = item;
+        ul.appendChild(li);
     });
+}
+
+function updateQuickStats(sortedDomains) {
+    const totalSites = sortedDomains.length;
+    const totalTime = sortedDomains.reduce((sum, [, duration]) => sum + duration, 0);
+
+    document.getElementById("totalSites").textContent = totalSites;
+    document.getElementById("totalTime").textContent = formatTime(totalTime);
+}
+
+function calculateTimeSpent(divName) {
+    chrome.storage.local.get(
+        ['productivityData', 'lastUpdated', 'categorySummary', 'recommendations'],
+        (result) => {
+            const sortedDomains = result.productivityData || [];
+            const lastUpdated = result.lastUpdated;
+            const categorySummary = result.categorySummary;
+            const recommendations = result.recommendations || [];
+
+            //Check if data is recent (within last 24 hours)
+            if (!lastUpdated || (Date.now() - lastUpdated) > (24 * 60 * 60 * 1000)) {
+                document.getElementById(divName).innerText = "Data not available. Please wait for daily update.";
+                document.getElementById("summary_div").innerText = "Summary not available yet.";
+                document.getElementById("recommendation_div").innerText = "Recommendations not available yet.";
+                document.getElementById("totalSites").textContent = "--";
+                document.getElementById("totalTime").textContent = "--";
+                return;
+            }
+
+            buildPopupDom(divName, sortedDomains);
+            buildSummaryDom(categorySummary);
+            buildRecommendationDom(recommendations);
+            updateQuickStats(sortedDomains);
+        }
+    );
 }
 
 document.addEventListener('DOMContentLoaded', function () {
     calculateTimeSpent('typedUrl_div');
-});
 
-document.getElementById("sendEmail").addEventListener("click", () => {
-    chrome.runtime.sendMessage({ action: "SEND_EMAIL" })
-  })
+    document.getElementById("sendEmail").addEventListener("click", () => {
+        chrome.runtime.sendMessage({ action: "SEND_EMAIL" });
+    });
+});

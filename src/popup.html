@@ -1,14 +1,42 @@
-<hmtl lang="en">
-<head>
-    <title>Daily Productivity Log</title>
-    <link rel="stylesheet" type="text/css" href="popup.css">
-</head>
-<body>
-<label class="switch">
-    <input id="enabled" type="checkbox">
-    <span class="slider round"></span>
-</label>
-<input class="secret" id="item" type="text">
-<script src="popup.js"></script>
-</body>
-</hmtl>
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Gander</title>
+
+    <!--App header with title and description-->>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+
+  <body>
+    <div class="header">
+      <h2>Gander</h2>
+      <span class="subtitle">Productivity Tracker</span>
+    </div>
+
+     <!-- Browsing history time breakdown -->
+    <div class="section">
+      <h3>Time Spent (Last 24h)</h3>
+      <div id="typedUrl_div">Calculating...</div>
+    </div>
+
+
+    <!-- Quick overview stats -->
+    <div class="section">
+      <h3>Quick Stats</h3>
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-number" id="totalSites">--</div>
+          <div class="stat-label">Sites</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number" id="totalTime">--</div>
+          <div class="stat-label">Total</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Email report trigger -->
+    <button id="sendEmail">Send Report</button>
+    <script src="popup.js"></script>
+  </body>
+</html>

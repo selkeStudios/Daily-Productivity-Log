@@ -1,32 +1,58 @@
-"use strict";
+"use strict"
 
-console.log("Hello, world from popup!")
-
-function setBadgeText(enabled) {
-    const text = enabled ? "ON" : "OFF"
-    void chrome.action.setBadgeText({text: text})
+//Helper to format milliseconds into readable "HHh MMm SSs"
+function formatTime(ms) {
+    const seconds = Math.floor((ms / 1000) % 60);
+    const minutes = Math.floor((ms / (1000 * 60)) % 60);
+    const hours = Math.floor(ms / (1000 * 60 * 60));
+    return `${hours > 0 ? hours + 'h ' : ''}${minutes}m ${seconds}s`;
 }
 
-// Handle the ON/OFF switch
-const checkbox = document.getElementById("enabled")
-chrome.storage.sync.get("enabled", (data) => {
-    checkbox.checked = !!data.enabled
-    void setBadgeText(data.enabled)
-})
-checkbox.addEventListener("change", (event) => {
-    if (event.target instanceof HTMLInputElement) {
-        void chrome.storage.sync.set({"enabled": event.target.checked})
-        void setBadgeText(event.target.checked)
-    }
-})
+function buildPopupDom(divName, sortedDomains) {
+    let popupDiv = document.getElementById(divName);
+    popupDiv.innerHTML = ''; // Clear previous content
 
-// Handle the input field
-const input = document.getElementById("item")
-chrome.storage.sync.get("item", (data) => {
-    input.value = data.item || ""
-});
-input.addEventListener("change", (event) => {
-    if (event.target instanceof HTMLInputElement) {
-        void chrome.storage.sync.set({"item": event.target.value})
+    let ul = document.createElement('ul');
+    popupDiv.appendChild(ul);
+
+    sortedDomains.forEach(([domain, duration]) => {
+        let li = document.createElement('li');
+        li.style.marginBottom = "8px";
+        li.innerHTML = `<strong>${domain}</strong>: ${formatTime(duration)}`;
+        ul.appendChild(li);
+    });
+
+    if (sortedDomains.length === 0) {
+        popupDiv.innerText = "No activity found in the last 24 hours.";
     }
-})
+}
+
+function calculateTimeSpent(divName) {
+    chrome.storage.local.get(['productivityData', 'lastUpdated'], (result) => {
+        const sortedDomains = result.productivityData || [];
+        const lastUpdated = result.lastUpdated;
+
+        //Update the title with the date
+        if (lastUpdated) {
+            const date = new Date(lastUpdated);
+            const dateString = `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear()}`;
+            document.querySelector('h2').textContent = `${dateString}`;
+        }
+
+        //Check if data is recent (within last 24 hours)
+        if (!lastUpdated || (Date.now() - lastUpdated) > (24 * 60 * 60 * 1000)) {
+            //Data is stale, show a message
+            document.getElementById(divName).innerText = "Data not available. Please wait for daily update.";
+            return;
+        }
+        buildPopupDom(divName, sortedDomains);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    calculateTimeSpent('typedUrl_div');
+});
+
+document.getElementById("sendEmail").addEventListener("click", () => {
+    chrome.runtime.sendMessage({ action: "SEND_EMAIL" })
+  })

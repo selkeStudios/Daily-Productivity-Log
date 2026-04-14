@@ -2,6 +2,9 @@
 // Central place to route runtime messages to services.
 
 import { sendDailyProductivityEmail } from "../services/emailService.js"
+import { runDailyProductivityLog } from "../services/productivityService.js"
+
+let isMessageRouterInitialized = false;
 
 function handleRuntimeMessage(message, sender, sendResponse) {
     if (!message || !message.type) {
@@ -9,6 +12,17 @@ function handleRuntimeMessage(message, sender, sendResponse) {
     }
 
     switch (message.type) {
+        case "RUN_DAILY_PRODUCTIVITY_LOG":
+            void runDailyProductivityLog("manual debug")
+                .then(({ productivityData, lastUpdated }) => {
+                    sendResponse({ok: true, entriesCount: productivityData.length, lastUpdated});
+                })
+                .catch((error) => {
+                    console.error("Failed to run the daily productivity log:", error);
+                    sendResponse({ok: false, error: error.message});
+                })
+            return true;
+
         case "SEND_DAILY_PRODUCTIVITY_EMAIL":
             void sendDailyProductivityEmail()
             sendResponse({ ok: true })

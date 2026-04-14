@@ -46,11 +46,64 @@ function calculateTimeSpent(divName) {
             return;
         }
         buildPopupDom(divName, sortedDomains);
+        updateQuickStats(sortedDomains);
     });
+}
+
+async function runDailyLogDebug() {
+    const runDailyLogButton = document.getElementById("runDailyLog")
+    runDailyLogButton.disabled = true
+    setStatus("Running the nightly data collection now...")
+
+    try {
+        const response = await sendRuntimeMessage({
+            type: "RUN_DAILY_PRODUCTIVITY_LOG"
+        })
+
+        if (!response?.ok) {
+            throw new Error(response?.error || "Unable to run the nightly data collection.");
+        }
+
+        calculateTimeSpent("typedUrl_div");
+
+        const updatedAt = new Date(response.lastUpdated);
+        setStatus(`Nightly data refreshed at ${updatedAt.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}.`);
+    } catch (error) {
+        setStatus(error.message, true);
+    } finally {
+        runDailyLogButton.disabled = false;
+    }
+}
+
+function updateQuickStats(sortedDomains) {
+    const totalDuration = sortedDomains.reduce((total, [, duration]) => total + duration, 0)
+
+    document.getElementById("totalSites").textContent = sortedDomains.length.toString();
+    document.getElementById("totalTime").textContent = formatTime(totalDuration);
+}
+
+function setStatus(message, isError = false) {
+    const statusMessage = document.getElementById("statusMessage");
+    statusMessage.textContent = message;
+    statusMessage.classList.toggle("error", isError);
+}
+
+function sendRuntimeMessage(message) {
+    return new Promise((resolve, reject) => {
+        chrome.runtime.sendMessage(message, (response) => {
+            if (chrome.runtime.lastError) {
+                reject(new Error(chrome.runtime.lastError.message));
+                return;
+            }
+
+            resolve(response);
+        })
+    })
 }
 
 document.addEventListener('DOMContentLoaded', function () {
     calculateTimeSpent('typedUrl_div');
+        document.getElementById("runDailyLog").addEventListener("click", runDailyLogDebug);
 });
 
 document.getElementById("sendEmail").addEventListener("click", () => {

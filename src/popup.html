@@ -3,14 +3,13 @@
   <head>
     <title>Gander</title>
 
-    <!--App header with title and description-->>
     <link rel="stylesheet" href="popup.css">
   </head>
 
   <body>
     <div class="header">
       <h2>Gander</h2>
-      <span class="subtitle">Productivity Tracker</span>
+      <span class="subtitle">Gander - Productivity Tracker</span>
     </div>
 
      <!-- Browsing history time breakdown -->
@@ -35,8 +34,11 @@
       </div>
     </div>
 
-    <!-- Email report trigger -->
-    <button id="sendEmail">Send Report</button>
+    <div class="button-stack">
+      <button id="runDailyLog" class="action-button secondary">Debug Run</button>
+      <button id="sendEmail" class="action-button">Send Report</button>
+    </div>
+    <div id="statusMessage" class="status-message" aria-live="polite"></div>
     <script src="popup.js"></script>
   </body>
 </html>

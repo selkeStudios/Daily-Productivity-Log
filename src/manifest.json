@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Gander - Productivity Tracker",
-    "version": "0.1.0",
+    "version": "0.5.0",
     "description": "Track your daily productivity and get tips on how to improve it.",
   
     "action": {
@@ -23,7 +23,9 @@
   
     "permissions": [
       "storage",
-      "identity"
+      "identity",
+      "alarms",
+      "history"
     ],
   
     "oauth2": {

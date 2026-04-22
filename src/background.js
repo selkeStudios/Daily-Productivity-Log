@@ -1,23 +1,36 @@
 "use strict"
 
-import { Lifecycle } from "./controllers/lifecycle.js"
+import { Lifecycle } from "./controllers/lifecycle.js";
 import {
     DAILY_LOG_ALARM_NAME,
+    ensureDailyProductivityLogIsCurrent,
     runDailyProductivityLog,
     scheduleDailyLog
-} from "./services/productivityService.js"
+} from "./services/productivityService.js";
 
-Lifecycle.registerListeners()
+Lifecycle.registerListeners();
+Lifecycle.init();
+
+async function initializeDailyLog() {
+    scheduleDailyLog();
+
+    try {
+        await ensureDailyProductivityLogIsCurrent("startup sync");
+    } catch (error) {
+        console.error("Failed to synchronize the daily productivity log on startup:", error);
+    }
+}
 
 chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === DAILY_LOG_ALARM_NAME) {
         void runDailyProductivityLog("scheduled")
+            .catch((error) => {
+                console.error("Failed to run the scheduled daily productivity log:", error);
+            })
+            .finally(() => {
+                scheduleDailyLog();
+            })
     }
 })
 
-Lifecycle.init()
-scheduleDailyLog()
-
-// Recreate the alarm when Chrome starts or the extension is installed/updated.
-chrome.runtime.onStartup.addListener(scheduleDailyLog)
-chrome.runtime.onInstalled.addListener(scheduleDailyLog)
+void initializeDailyLog();

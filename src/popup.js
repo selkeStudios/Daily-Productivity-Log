@@ -149,6 +149,22 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById("runDailyLog").addEventListener("click", runDailyLogDebug);
 });
 
-document.getElementById("sendEmail").addEventListener("click", () => {
-    chrome.runtime.sendMessage({ action: "SEND_EMAIL" })
-  })
+document.getElementById("sendEmail").addEventListener("click", async () => {
+    const sendEmailButton = document.getElementById("sendEmail");
+    sendEmailButton.disabled = true;
+    setStatus("Sending report email...");
+
+    try {
+        const response = await sendRuntimeMessage({ type: "SEND_DAILY_PRODUCTIVITY_EMAIL" });
+
+        if (!response?.ok) {
+            throw new Error(response?.error || "Unable to send the report email.");
+        }
+
+        setStatus("Report email sent successfully.");
+    } catch (error) {
+        setStatus(error.message, true);
+    } finally {
+        sendEmailButton.disabled = false;
+    }
+});

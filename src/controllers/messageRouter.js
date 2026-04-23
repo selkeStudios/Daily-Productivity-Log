@@ -45,8 +45,14 @@ function handleRuntimeMessage(message, sender, sendResponse) {
 
         case "SEND_DAILY_PRODUCTIVITY_EMAIL":
             void sendDailyProductivityEmail()
-            sendResponse({ ok: true });
-            return false;
+                .then(() => {
+                    sendResponse({ ok: true });
+                })
+                .catch((error) => {
+                    console.error("Failed to send daily productivity email:", error);
+                    sendResponse({ ok: false, error: error.message });
+                });
+            return true;
         default:
             return false;
     }

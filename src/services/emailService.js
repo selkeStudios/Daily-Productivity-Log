@@ -37,28 +37,25 @@ function buildMimeEmail() {
 }
 
 export async function sendDailyProductivityEmail() {
-    try {
-        const token = await getAuthToken()
-        const rawEmail = toBase64Url(buildMimeEmail())
+    const token = await getAuthToken()
+    const rawEmail = toBase64Url(buildMimeEmail())
 
-        const response = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ raw: rawEmail })
-        })
+    const response = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ raw: rawEmail })
+    })
 
-        if (!response.ok) {
-            const errorText = await response.text()
-            console.error("❌ Gmail API Error:", response.status, errorText)
-            return
-        }
-
-        console.log("✅ Email sent successfully")
-    } catch (error) {
-        console.error("❌ Error sending email:", error)
+    if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Gmail API error (${response.status}): ${errorText}`)
     }
+
+    const payload = await response.json()
+    console.log("Email sent successfully:", payload.id)
+    return payload
 }
 

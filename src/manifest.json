@@ -22,7 +22,7 @@
     },
   
     "permissions": [
-      "storage",
+      "storage", 
       "identity",
       "alarms",
       "history"

@@ -1,12 +1,10 @@
 // Lifecycle / Startup Layer
 // Wires together all background subsystems.
 
-import { initBadge } from "./badgeController.js"
 import { initMessageRouter } from "./messageRouter.js"
 
 function init() {
     // Initialize sub-systems here
-    initBadge()
     initMessageRouter()
 }
 

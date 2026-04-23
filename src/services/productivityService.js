@@ -1,5 +1,7 @@
 "use strict"
 
+import { summarizeByCategory, generateRecommendations } from "./recommendationService.js"
+
 export const DAILY_LOG_ALARM_NAME = "dailyLog";
 
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -13,7 +15,9 @@ const DAILY_LOG_STORAGE_KEYS = [
     "lastUpdated",
     "reportWindowStart",
     "reportWindowEnd",
-    "lastCompletedCutoff"
+    "lastCompletedCutoff",
+    "categorySummary",
+    "recommendations",
 ];
 
 let activeDailyLogOperation = null;
@@ -157,14 +161,18 @@ async function runDailyProductivityLogInternal(trigger = "manual", options = {})
     const reportWindowEnd = windowEnd.getTime();
     const reportWindowStart = reportWindowEnd - ONE_DAY_IN_MS;
     const productivityData = await collectProductivityData(reportWindowStart, reportWindowEnd);
-    const lastUpdated = Date.now();
+    const lastUpdated = Date.now()
+    const categorySummary = summarizeByCategory(productivityData)
+    const recommendations = generateRecommendations(categorySummary)
 
     await setLocalStorage({
         productivityData,
         lastUpdated,
         reportWindowStart,
         reportWindowEnd,
-        lastCompletedCutoff: reportWindowEnd
+        lastCompletedCutoff: reportWindowEnd,
+        categorySummary,
+        recommendations,
     });
 
     console.log(
@@ -184,7 +192,9 @@ async function runDailyProductivityLogInternal(trigger = "manual", options = {})
         lastUpdated,
         reportWindowStart,
         reportWindowEnd,
-        lastCompletedCutoff: reportWindowEnd
+        lastCompletedCutoff: reportWindowEnd,
+        categorySummary,
+        recommendations,
     };
 }
 

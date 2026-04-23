@@ -46,10 +46,12 @@ function buildPopupDom(divName, sortedDomains) {
 }
 
 function calculateTimeSpent(divName) {
-     chrome.storage.local.get(['productivityData', 'lastUpdated', 'reportWindowEnd'], (result) => {
+    chrome.storage.local.get(['productivityData', 'lastUpdated', 'reportWindowEnd', 'categorySummary', 'recommendations'], (result) => {
         const sortedDomains = result.productivityData || [];
         const lastUpdated = result.lastUpdated;
         const reportWindowEnd = result.reportWindowEnd;
+        const categorySummary = result.categorySummary;
+        const recommendations = result.recommendations || [];
         const expectedWindowEnd = getMostRecentDailyCutoff();
 
         //Update the title with the completed report date.
@@ -69,6 +71,8 @@ function calculateTimeSpent(divName) {
 
         buildPopupDom(divName, sortedDomains);
         updateQuickStats(sortedDomains);
+        buildSummaryDom(categorySummary);
+        buildRecommendationDom(recommendations);
     });
 }
 
@@ -135,6 +139,38 @@ function sendRuntimeMessage(message) {
     })
 }
 
+function buildSummaryDom(summary) {
+    const div = document.getElementById("summary_div")
+    if (!summary) {
+        div.innerText = "Summary not available yet."
+        return
+    }
+    div.innerHTML = `
+        <div style="font-size:13px; line-height:1.8;">
+            <span style="color:#4CAF50;">▲ Productive:</span> ${formatTime(summary.productiveTime)}<br>
+            <span style="color:#f44336;">▼ Unproductive:</span> ${formatTime(summary.unproductiveTime)}<br>
+            <span style="color:#888;">● Neutral:</span> ${formatTime(summary.neutralTime)}
+        </div>
+    `
+}
+
+function buildRecommendationDom(recommendations) {
+    const div = document.getElementById("recommendation_div")
+    div.innerHTML = ""
+    if (!recommendations || recommendations.length === 0) {
+        div.innerText = "No recommendations available yet."
+        return
+    }
+    const ul = document.createElement("ul")
+    recommendations.forEach((text) => {
+        const li = document.createElement("li")
+        li.style.marginBottom = "8px"
+        li.textContent = text
+        ul.appendChild(li)
+    })
+    div.appendChild(ul)
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     void (async () => {
         try {
@@ -145,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         calculateTimeSpent('typedUrl_div');
     })();
-    
+
     document.getElementById("runDailyLog").addEventListener("click", runDailyLogDebug);
 });
 

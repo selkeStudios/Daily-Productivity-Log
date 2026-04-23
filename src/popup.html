@@ -1,44 +1,58 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <title>Gander</title>
 
-    <link rel="stylesheet" href="popup.css">
-  </head>
+<head>
+  <title>Gander</title>
 
-  <body>
-    <div class="header">
-      <h2>Gander</h2>
-      <span class="subtitle">Gander - Productivity Tracker</span>
-    </div>
+  <link rel="stylesheet" href="popup.css">
+</head>
 
-     <!-- Browsing history time breakdown -->
-    <div class="section">
-      <h3>Time Spent</h3>
-      <div id="typedUrl_div">Calculating...</div>
-    </div>
+<body>
+  <div class="header">
+    <h2>Gander</h2>
+    <span class="subtitle">Gander - Productivity Tracker</span>
+  </div>
+
+  <!-- Browsing history time breakdown -->
+  <div class="section">
+    <h3>Time Spent</h3>
+    <div id="typedUrl_div">Calculating...</div>
+  </div>
 
 
-    <!-- Quick overview stats -->
-    <div class="section">
-      <h3>Quick Stats</h3>
-      <div class="stats-row">
-        <div class="stat-box">
-          <div class="stat-number" id="totalSites">--</div>
-          <div class="stat-label">Sites</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-number" id="totalTime">--</div>
-          <div class="stat-label">Total</div>
-        </div>
+  <!-- Quick overview stats -->
+  <div class="section">
+    <h3>Quick Stats</h3>
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-number" id="totalSites">--</div>
+        <div class="stat-label">Sites</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number" id="totalTime">--</div>
+        <div class="stat-label">Total</div>
       </div>
     </div>
+  </div>
 
-    <div class="button-stack">
-      <button id="runDailyLog" class="action-button secondary">Debug Run</button>
-      <button id="sendEmail" class="action-button">Send Report</button>
-    </div>
-    <div id="statusMessage" class="status-message" aria-live="polite"></div>
-    <script src="popup.js"></script>
-  </body>
+  <!-- Category summary -->
+  <div class="section">
+    <h3>Category Summary</h3>
+    <div id="summary_div">Waiting for data...</div>
+  </div>
+
+  <!-- Recommendations -->
+  <div class="section">
+    <h3>Recommendations</h3>
+    <div id="recommendation_div">Waiting for data...</div>
+  </div>
+
+  <div class="button-stack">
+    <button id="runDailyLog" class="action-button secondary">Debug Run</button>
+    <button id="sendEmail" class="action-button">Send Report</button>
+  </div>
+  <div id="statusMessage" class="status-message" aria-live="polite"></div>
+  <script src="popup.js"></script>
+</body>
+
 </html>

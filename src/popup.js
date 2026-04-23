@@ -147,9 +147,9 @@ function buildSummaryDom(summary) {
     }
     div.innerHTML = `
         <div style="font-size:13px; line-height:1.8;">
-            <span style="color:#4CAF50;">▲ Productive:</span> ${formatTime(summary.productiveTime)}<br>
-            <span style="color:#f44336;">▼ Unproductive:</span> ${formatTime(summary.unproductiveTime)}<br>
-            <span style="color:#888;">● Neutral:</span> ${formatTime(summary.neutralTime)}
+            <span style="color:#4CAF50;">&#9650; Productive:</span> ${formatTime(summary.productiveTime)}<br>
+            <span style="color:#f44336;">&#9660; Unproductive:</span> ${formatTime(summary.unproductiveTime)}<br>
+            <span style="color:#888;">&#9679; Neutral:</span> ${formatTime(summary.neutralTime)}
         </div>
     `
 }

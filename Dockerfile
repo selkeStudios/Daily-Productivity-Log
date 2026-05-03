@@ -16,4 +16,6 @@ WORKDIR /app
 
 COPY --from=builder /app ./
 
-CMD ["node", "-e", "console.log('Gander Extension - Build environment ready. Version: ' + require('./package.json').version)"]
+EXPOSE 3000
+
+CMD ["node", "server.js"]

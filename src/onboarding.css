@@ -1,0 +1,20 @@
+.onboarding-body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.onboarding-shell {
+    width: 100%;
+    max-width: 420px;
+}
+
+.onboarding-card {
+    margin-bottom: 0;
+}
+
+.onboarding-card.hidden {
+    display: none !important;
+}

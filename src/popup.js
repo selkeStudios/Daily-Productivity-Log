@@ -53,10 +53,13 @@ function calculateTimeSpent(divName) {
         const expectedWindowEnd = getMostRecentDailyCutoff();
 
         //Update the title with the completed report date.
-        if (reportWindowEnd) {
-            document.querySelector('h2').textContent = formatDateLabel(reportWindowEnd);
-        } else if (lastUpdated) {
-            document.querySelector('h2').textContent = formatDateLabel(lastUpdated);
+        const headerTitle = document.getElementById("headerTitle");
+        if (headerTitle) {
+            if (reportWindowEnd) {
+                headerTitle.textContent = formatDateLabel(reportWindowEnd);
+            } else if (lastUpdated) {
+                headerTitle.textContent = formatDateLabel(lastUpdated);
+            }
         }
 
         const isFreshDailyWindow = reportWindowEnd === expectedWindowEnd;
@@ -135,36 +138,107 @@ function sendRuntimeMessage(message) {
     })
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    void (async () => {
-        try {
-            await ensureCurrentDailyLog();
-        } catch (error) {
-            setStatus(error.message, true);
-        }
+function showAuthView() {
+    document.getElementById("auth-view").classList.remove("hidden");
+    document.getElementById("main-view").classList.add("hidden");
+}
 
-        calculateTimeSpent('typedUrl_div');
-    })();
-    
-    document.getElementById("runDailyLog").addEventListener("click", runDailyLogDebug);
-});
+function showMainView() {
+    document.getElementById("auth-view").classList.add("hidden");
+    document.getElementById("main-view").classList.remove("hidden");
+}
 
-document.getElementById("sendEmail").addEventListener("click", async () => {
-    const sendEmailButton = document.getElementById("sendEmail");
-    sendEmailButton.disabled = true;
-    setStatus("Sending report email...");
+function setAuthStatus(message, isError = false) {
+    const authStatus = document.getElementById("authStatus");
+    authStatus.textContent = message;
+    authStatus.classList.toggle("error", isError);
+}
 
+async function refreshAuthChromeState() {
     try {
-        const response = await sendRuntimeMessage({ type: "SEND_DAILY_PRODUCTIVITY_EMAIL" });
-
-        if (!response?.ok) {
-            throw new Error(response?.error || "Unable to send the report email.");
+        const response = await sendRuntimeMessage({ type: "GET_GOOGLE_AUTH_STATE" });
+        const signedIn = Boolean(response?.ok && response.emailId);
+        if (signedIn) {
+            showMainView();
+            await loadMainDashboard();
+        } else {
+            showAuthView();
         }
+    } catch {
+        showAuthView();
+    }
+}
 
-        setStatus("Report email sent successfully.");
+async function loadMainDashboard() {
+    try {
+        await ensureCurrentDailyLog();
     } catch (error) {
         setStatus(error.message, true);
-    } finally {
-        sendEmailButton.disabled = false;
     }
+    calculateTimeSpent("typedUrl_div");
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    void refreshAuthChromeState();
+
+    document.getElementById("loginGoogle").addEventListener("click", async () => {
+        const loginBtn = document.getElementById("loginGoogle");
+        loginBtn.disabled = true;
+        setAuthStatus("Opening Google sign-in…");
+
+        try {
+            const response = await sendRuntimeMessage({ type: "GOOGLE_SIGN_IN" });
+            if (!response?.ok || !response.emailId) {
+                throw new Error(response?.error || "Sign-in failed.");
+            }
+            setAuthStatus("");
+            showMainView();
+            await loadMainDashboard();
+        } catch (error) {
+            setAuthStatus(error.message, true);
+        } finally {
+            loginBtn.disabled = false;
+        }
+    });
+
+    document.getElementById("signOutBtn").addEventListener("click", async () => {
+        const signOutBtn = document.getElementById("signOutBtn");
+        signOutBtn.disabled = true;
+        setStatus("Signing out…");
+
+        try {
+            const response = await sendRuntimeMessage({ type: "GOOGLE_SIGN_OUT" });
+            if (!response?.ok) {
+                throw new Error(response?.error || "Sign-out failed.");
+            }
+            setStatus("");
+            showAuthView();
+        } catch (error) {
+            setStatus(error.message, true);
+        } finally {
+            signOutBtn.disabled = false;
+        }
+    });
+
+    document.getElementById("runDailyLog").addEventListener("click", runDailyLogDebug);
+
+    document.getElementById("sendEmail").addEventListener("click", async () => {
+        const sendEmailButton = document.getElementById("sendEmail");
+        sendEmailButton.disabled = true;
+        setStatus("Sending report email...");
+
+        try {
+            const response = await sendRuntimeMessage({ type: "SEND_DAILY_PRODUCTIVITY_EMAIL" });
+
+            if (!response?.ok) {
+                throw new Error(response?.error || "Unable to send the report email.");
+            }
+
+            setStatus("Report email sent successfully.");
+        } catch (error) {
+            setStatus(error.message, true);
+        } finally {
+            sendEmailButton.disabled = false;
+        }
+    });
 });

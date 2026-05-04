@@ -10,7 +10,12 @@ function init() {
 
 function registerListeners() {
     chrome.runtime.onStartup.addListener(init)
-    chrome.runtime.onInstalled.addListener(init)
+    chrome.runtime.onInstalled.addListener((details) => {
+        init()
+        if (details.reason === "install") {
+            chrome.tabs.create({ url: chrome.runtime.getURL("onboarding.html") })
+        }
+    })
 }
 
 export const Lifecycle = {

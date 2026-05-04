@@ -1,24 +1,11 @@
 "use strict"
 
 import { GEMINI_API_KEY } from "../config.js"
-
-
+import { getAuthTokenInteractive } from "./googleAuthService.js"
 
 const EMAIL_CONFIG = {
     to: "reshma2001d@gmail.com",
     subject: "Your Daily Productivity Report - Gander",
-}
-
-function getAuthToken() {
-    return new Promise((resolve, reject) => {
-        chrome.identity.getAuthToken({ interactive: true }, (token) => {
-            if (chrome.runtime.lastError || !token) {
-                reject(new Error(chrome.runtime.lastError?.message || "Auth failed"))
-                return
-            }
-            resolve(token)
-        })
-    })
 }
 
 function toBase64Url(text) {
@@ -174,7 +161,7 @@ export async function sendDailyProductivityEmail() {
         const emailBody = buildEmailBody(productivityData, aiSummary, lastUpdated)
 
         // 4. Get Gmail auth token
-        const token = await getAuthToken()
+        const token = await getAuthTokenInteractive()
 
         // 5. Send email via Gmail API
         const rawEmail = toBase64Url(buildMimeEmail(emailBody))

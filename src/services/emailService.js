@@ -1,12 +1,9 @@
 "use strict"
 
 import { GEMINI_API_KEY } from "../config.js"
-import { getAuthTokenInteractive } from "./googleAuthService.js"
+import { getAuthTokenInteractive,getStoredEmail } from "./googleAuthService.js"
 
-const EMAIL_CONFIG = {
-    to: "reshma2001d@gmail.com",
-    subject: "Your Daily Productivity Report - Gander",
-}
+
 
 function toBase64Url(text) {
     const bytes = new TextEncoder().encode(text)
@@ -141,20 +138,20 @@ export async function sendDailyProductivityEmail() {
     try {
         console.log("📧 Preparing daily productivity email...")
 
+        // ✅ Get logged-in user email
+        const userEmail = await getStoredEmail()
+
+        if (!userEmail) {
+            throw new Error("User not signed in or email not found.")
+        }
+
         // 1. Get stored productivity data
         const { productivityData, lastUpdated } = await getStoredProductivityData()
-        console.log(`Found ${productivityData.length} domains in stored data.`)
 
-        // 2. Generate AI summary using Gemini
+        // 2. Generate AI summary
         let aiSummary = null
         if (productivityData.length > 0) {
-            console.log("🤖 Calling Gemini API for AI summary...")
             aiSummary = await generateAISummary(productivityData)
-            if (aiSummary) {
-                console.log("✅ AI summary generated successfully.")
-            } else {
-                console.warn("⚠️ AI summary failed, sending email without AI analysis.")
-            }
         }
 
         // 3. Build email body
@@ -163,8 +160,24 @@ export async function sendDailyProductivityEmail() {
         // 4. Get Gmail auth token
         const token = await getAuthTokenInteractive()
 
-        // 5. Send email via Gmail API
-        const rawEmail = toBase64Url(buildMimeEmail(emailBody))
+        // ✅ Use dynamic email here
+        const emailConfig = {
+            to: userEmail,
+            subject: "Your Daily Productivity Report - Gander",
+        }
+
+        const rawEmail = toBase64Url(
+            [
+                'Content-Type: text/plain; charset="UTF-8"',
+                "MIME-Version: 1.0",
+                `To: ${emailConfig.to}`,
+                `Subject: ${emailConfig.subject}`,
+                "",
+                emailBody,
+            ].join("\r\n")
+        )
+
+        // 5. Send email
         const response = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
             method: "POST",
             headers: {
@@ -180,7 +193,7 @@ export async function sendDailyProductivityEmail() {
             return
         }
 
-        console.log("✅ Email sent successfully with AI productivity analysis!")
+        console.log("✅ Email sent to:", userEmail)
     } catch (error) {
         console.error("❌ Error sending email:", error)
     }

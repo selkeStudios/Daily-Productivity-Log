@@ -97,3 +97,11 @@ export async function getGoogleAuthState() {
         return { signedIn: false, emailId: "" }
     }
 }
+
+export async function getStoredEmail() {
+    return new Promise((resolve) => {
+        chrome.storage.local.get(["googleAuthEmailId"], (result) => {
+            resolve((result.googleAuthEmailId || "").trim());
+        });
+    });
+}

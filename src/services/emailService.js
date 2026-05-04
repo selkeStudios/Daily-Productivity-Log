@@ -1,9 +1,8 @@
 "use strict"
 
-// ⚠️ Fill in your own Gemini API key for local testing
-// Get a free key at: https://aistudio.google.com/apikey
-// Do NOT commit your key to GitHub
-const GEMINI_API_KEY = "AIzaSyDvHJLaIYAcXngd5IWeMwHmIwGKkp4RyAc"
+import { GEMINI_API_KEY } from "../config.js"
+
+
 
 const EMAIL_CONFIG = {
     to: "reshma2001d@gmail.com",

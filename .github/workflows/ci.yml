@@ -23,6 +23,10 @@ jobs:
         working-directory: ./src
         run: npm ci
 
+      - name: Run unit tests
+        working-directory: ./src
+        run: npm test
+
       - name: Verify extension files
         run: |
           test -f src/manifest.json && echo "✓ manifest.json"

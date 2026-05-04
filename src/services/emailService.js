@@ -124,6 +124,14 @@ Gander - Productivity Tracker
 This report was generated automatically by your Gander Chrome Extension.`
 }
 
+export const __testables = {
+    toBase64Url,
+    formatTime,
+    generateAISummary,
+    getStoredProductivityData,
+    buildEmailBody,
+}
+
 export async function sendDailyProductivityEmail() {
     try {
         console.log("📧 Preparing daily productivity email...")

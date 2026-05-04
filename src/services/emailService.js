@@ -3,7 +3,7 @@
 // ⚠️ Fill in your own Gemini API key for local testing
 // Get a free key at: https://aistudio.google.com/apikey
 // Do NOT commit your key to GitHub
-const GEMINI_API_KEY = "Your Gemini API KEY"
+const GEMINI_API_KEY = "AIzaSyDvHJLaIYAcXngd5IWeMwHmIwGKkp4RyAc"
 
 const EMAIL_CONFIG = {
     to: "reshma2001d@gmail.com",

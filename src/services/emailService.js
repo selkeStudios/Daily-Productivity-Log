@@ -87,16 +87,6 @@ function getStoredProductivityData() {
     })
 }
 
-function buildMimeEmail(body) {
-    return [
-        'Content-Type: text/plain; charset="UTF-8"',
-        "MIME-Version: 1.0",
-        `To: ${EMAIL_CONFIG.to}`,
-        `Subject: ${EMAIL_CONFIG.subject}`,
-        "",
-        body,
-    ].join("\r\n")
-}
 
 function buildEmailBody(productivityData, aiSummary, lastUpdated) {
     const dateStr = lastUpdated

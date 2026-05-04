@@ -40,6 +40,17 @@ jobs:
           test -f src/popup.html && echo "✓ popup.html"
           test -f src/popup.js && echo "✓ popup.js"
 
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install pytest
+        run: pip install pytest
+
+      - name: Run Python tests
+        run: pytest src/test_popup.py -v
+
       - name: Log in to DockerHub
         if: github.ref == 'refs/heads/main'
         uses: docker/login-action@v3

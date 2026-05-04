@@ -23,6 +23,12 @@ jobs:
         working-directory: ./src
         run: npm ci
 
+      - name: Create CI test config
+        run: |
+          if [ ! -f src/config.js ]; then
+            echo 'export const GEMINI_API_KEY = "";' > src/config.js
+          fi
+
       - name: Run unit tests
         working-directory: ./src
         run: npm test

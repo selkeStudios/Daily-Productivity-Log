@@ -1,18 +1,67 @@
-"use strict"
+"use strict";
 
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 
-//Helper to format milliseconds into readable "HHh MMm SSs"
+function getViews() {
+    return {
+        checking: document.getElementById("checkingView"),
+        auth: document.getElementById("authView"),
+        app: document.getElementById("appView"),
+    };
+}
+
+function showView(name) {
+    const { checking, auth, app } = getViews();
+    checking.classList.toggle("hidden", name !== "checking");
+    auth.classList.toggle("hidden", name !== "auth");
+    app.classList.toggle("hidden", name !== "app");
+}
+
+function requestAuthToken(interactive) {
+    return new Promise((resolve, reject) => {
+        chrome.identity.getAuthToken({ interactive }, (token) => {
+            if (chrome.runtime.lastError || !token) {
+                reject(new Error(chrome.runtime.lastError?.message || "Sign-in was cancelled."));
+                return;
+            }
+            resolve(token);
+        });
+    });
+}
+
+async function isSignedIn() {
+    try {
+        await requestAuthToken(false);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+function signOutGoogle() {
+    return new Promise((resolve) => {
+        chrome.identity.clearAllCachedAuthTokens(() => {
+            if (chrome.runtime.lastError) {
+                console.warn(chrome.runtime.lastError.message);
+            }
+            resolve();
+        });
+    });
+}
+
 function formatTime(ms) {
     const seconds = Math.floor((ms / 1000) % 60);
     const minutes = Math.floor((ms / (1000 * 60)) % 60);
     const hours = Math.floor(ms / (1000 * 60 * 60));
-    return `${hours > 0 ? hours + 'h ' : ''}${minutes}m ${seconds}s`;
+    return `${hours > 0 ? hours + "h " : ""}${minutes}m ${seconds}s`;
 }
 
 function formatDateLabel(timestamp) {
     const date = new Date(timestamp);
-    return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear()}`;
+    return `${(date.getMonth() + 1).toString().padStart(2, "0")}/${date
+        .getDate()
+        .toString()
+        .padStart(2, "0")}/${date.getFullYear()}`;
 }
 
 function getMostRecentDailyCutoff(referenceTime = Date.now()) {
@@ -27,14 +76,14 @@ function getMostRecentDailyCutoff(referenceTime = Date.now()) {
 }
 
 function buildPopupDom(divName, sortedDomains) {
-    let popupDiv = document.getElementById(divName);
-    popupDiv.innerHTML = ''; // Clear previous content
+    const popupDiv = document.getElementById(divName);
+    popupDiv.innerHTML = "";
 
-    let ul = document.createElement('ul');
+    const ul = document.createElement("ul");
     popupDiv.appendChild(ul);
 
     sortedDomains.forEach(([domain, duration]) => {
-        let li = document.createElement('li');
+        const li = document.createElement("li");
         li.style.marginBottom = "8px";
         li.innerHTML = `<strong>${domain}</strong>: ${formatTime(duration)}`;
         ul.appendChild(li);
@@ -46,24 +95,25 @@ function buildPopupDom(divName, sortedDomains) {
 }
 
 function calculateTimeSpent(divName) {
-     chrome.storage.local.get(['productivityData', 'lastUpdated', 'reportWindowEnd'], (result) => {
+    chrome.storage.local.get(["productivityData", "lastUpdated", "reportWindowEnd"], (result) => {
         const sortedDomains = result.productivityData || [];
         const lastUpdated = result.lastUpdated;
         const reportWindowEnd = result.reportWindowEnd;
         const expectedWindowEnd = getMostRecentDailyCutoff();
 
-        //Update the title with the completed report date.
-        if (reportWindowEnd) {
-            document.querySelector('h2').textContent = formatDateLabel(reportWindowEnd);
-        } else if (lastUpdated) {
-            document.querySelector('h2').textContent = formatDateLabel(lastUpdated);
+        const titleEl = document.querySelector("#appView .header h2");
+        if (reportWindowEnd && titleEl) {
+            titleEl.textContent = formatDateLabel(reportWindowEnd);
+        } else if (lastUpdated && titleEl) {
+            titleEl.textContent = formatDateLabel(lastUpdated);
         }
 
         const isFreshDailyWindow = reportWindowEnd === expectedWindowEnd;
-        const isRecentlyUpdated = lastUpdated && (Date.now() - lastUpdated) <= ONE_DAY_IN_MS;
+        const isRecentlyUpdated = lastUpdated && Date.now() - lastUpdated <= ONE_DAY_IN_MS;
 
         if (!isFreshDailyWindow || !isRecentlyUpdated) {
-            document.getElementById(divName).innerText = "Data not available. Please wait for the next 11:59 PM update.";
+            document.getElementById(divName).innerText =
+                "Data not available. Please wait for the next 11:59 PM update.";
             return;
         }
 
@@ -74,7 +124,7 @@ function calculateTimeSpent(divName) {
 
 async function ensureCurrentDailyLog() {
     const response = await sendRuntimeMessage({
-        type: "ENSURE_DAILY_PRODUCTIVITY_LOG_CURRENT"
+        type: "ENSURE_DAILY_PRODUCTIVITY_LOG_CURRENT",
     });
 
     if (!response?.ok) {
@@ -91,7 +141,7 @@ async function runDailyLogDebug() {
 
     try {
         const response = await sendRuntimeMessage({
-            type: "RUN_DAILY_PRODUCTIVITY_LOG"
+            type: "RUN_DAILY_PRODUCTIVITY_LOG",
         });
 
         if (!response?.ok) {
@@ -101,7 +151,13 @@ async function runDailyLogDebug() {
         calculateTimeSpent("typedUrl_div");
 
         const updatedAt = new Date(response.lastUpdated);
-        setStatus(`Data refreshed on ${updatedAt.toLocaleDateString([], { month: 'numeric', day: '2-digit', year: 'numeric' })}.`);
+        setStatus(
+            `Data refreshed on ${updatedAt.toLocaleDateString([], {
+                month: "numeric",
+                day: "2-digit",
+                year: "numeric",
+            })}.`
+        );
     } catch (error) {
         setStatus(error.message, true);
     } finally {
@@ -122,6 +178,12 @@ function setStatus(message, isError = false) {
     statusMessage.classList.toggle("error", isError);
 }
 
+function setAuthStatus(message, isError = false) {
+    const el = document.getElementById("authStatusMessage");
+    el.textContent = message;
+    el.classList.toggle("error", isError);
+}
+
 function sendRuntimeMessage(message) {
     return new Promise((resolve, reject) => {
         chrome.runtime.sendMessage(message, (response) => {
@@ -131,40 +193,80 @@ function sendRuntimeMessage(message) {
             }
 
             resolve(response);
-        })
-    })
+        });
+    });
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    void (async () => {
-        try {
-            await ensureCurrentDailyLog();
-        } catch (error) {
-            setStatus(error.message, true);
-        }
-
-        calculateTimeSpent('typedUrl_div');
-    })();
-    
-    document.getElementById("runDailyLog").addEventListener("click", runDailyLogDebug);
-});
-
-document.getElementById("sendEmail").addEventListener("click", async () => {
-    const sendEmailButton = document.getElementById("sendEmail");
-    sendEmailButton.disabled = true;
-    setStatus("Sending report email...");
-
+async function bootstrapAppView() {
     try {
-        const response = await sendRuntimeMessage({ type: "SEND_DAILY_PRODUCTIVITY_EMAIL" });
-
-        if (!response?.ok) {
-            throw new Error(response?.error || "Unable to send the report email.");
-        }
-
-        setStatus("Report email sent successfully.");
+        await ensureCurrentDailyLog();
     } catch (error) {
         setStatus(error.message, true);
-    } finally {
-        sendEmailButton.disabled = false;
     }
+
+    calculateTimeSpent("typedUrl_div");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const loginBtn = document.getElementById("loginGoogle");
+    const signOutBtn = document.getElementById("signOut");
+
+    void (async () => {
+        showView("checking");
+        const signedIn = await isSignedIn();
+        if (signedIn) {
+            showView("app");
+            await bootstrapAppView();
+        } else {
+            showView("auth");
+        }
+    })();
+
+    loginBtn.addEventListener("click", async () => {
+        loginBtn.disabled = true;
+        setAuthStatus("");
+
+        try {
+            await requestAuthToken(true);
+            showView("app");
+            await bootstrapAppView();
+        } catch (error) {
+            setAuthStatus(error.message, true);
+        } finally {
+            loginBtn.disabled = false;
+        }
+    });
+
+    signOutBtn.addEventListener("click", async () => {
+        signOutBtn.disabled = true;
+        try {
+            await signOutGoogle();
+            setStatus("");
+            showView("auth");
+        } finally {
+            signOutBtn.disabled = false;
+        }
+    });
+
+    document.getElementById("runDailyLog").addEventListener("click", runDailyLogDebug);
+
+    document.getElementById("sendEmail").addEventListener("click", async () => {
+        const sendEmailButton = document.getElementById("sendEmail");
+        sendEmailButton.disabled = true;
+        setStatus("Sending report email...");
+
+        try {
+            const response = await sendRuntimeMessage({ type: "SEND_DAILY_PRODUCTIVITY_EMAIL" });
+
+            if (!response?.ok) {
+                throw new Error(response?.error || "Unable to send the report email.");
+            }
+
+            setStatus("Report email sent successfully.");
+        } catch (error) {
+            setStatus(error.message, true);
+        } finally {
+            sendEmailButton.disabled = false;
+        }
+    });
 });

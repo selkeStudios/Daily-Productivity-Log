@@ -12,6 +12,131 @@ body {
     background: #f8f9fa;
     color: #333;
 }
+
+.view.hidden {
+    display: none !important;
+}
+
+.checking-view {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+}
+
+.checking-text {
+    font-size: 13px;
+    color: #888;
+}
+
+/* Authentication screen */
+.auth-view {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    min-height: 280px;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+    padding: 24px 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    border: 1px solid #eee;
+}
+
+.auth-brand {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.auth-title {
+    color: #2196F3;
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.auth-tagline {
+    font-size: 12px;
+    color: #999;
+}
+
+.auth-lead {
+    font-size: 13px;
+    line-height: 1.45;
+    color: #555;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.btn-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 11px 16px;
+    background: #fff;
+    color: #3c4043;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-google:hover {
+    background: #f8f9fa;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.btn-google:focus-visible {
+    outline: 2px solid #2196F3;
+    outline-offset: 2px;
+}
+
+.btn-google:disabled {
+    opacity: 0.65;
+    cursor: wait;
+}
+
+.btn-google-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-google-label {
+    letter-spacing: 0.01em;
+}
+
+.header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.link-button {
+    flex-shrink: 0;
+    padding: 4px 0;
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 12px;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.link-button:hover {
+    color: #2196F3;
+}
     /* Header section */
 .header {
     margin-bottom: 14px;

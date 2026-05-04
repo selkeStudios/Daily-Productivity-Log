@@ -169,6 +169,32 @@ async function refreshAuthChromeState() {
     }
 }
 
+export async function handleLoginGoogleClick({
+    loginBtn,
+    setAuthStatusFn = setAuthStatus,
+    sendRuntimeMessageFn = sendRuntimeMessage,
+    showMainViewFn = showMainView,
+    loadMainDashboardFn = loadMainDashboard,
+} = {}) {
+    const button = loginBtn || document.getElementById("loginGoogle");
+    button.disabled = true;
+    setAuthStatusFn("Opening Google sign-in…");
+
+    try {
+        const response = await sendRuntimeMessageFn({ type: "GOOGLE_SIGN_IN" });
+        if (!response?.ok || !response.emailId) {
+            throw new Error(response?.error || "Sign-in failed.");
+        }
+        setAuthStatusFn("");
+        showMainViewFn();
+        await loadMainDashboardFn();
+    } catch (error) {
+        setAuthStatusFn(error.message, true);
+    } finally {
+        button.disabled = false;
+    }
+}
+
 async function loadMainDashboard() {
     try {
         await ensureCurrentDailyLog();
@@ -181,24 +207,8 @@ async function loadMainDashboard() {
 document.addEventListener("DOMContentLoaded", function () {
     void refreshAuthChromeState();
 
-    document.getElementById("loginGoogle").addEventListener("click", async () => {
-        const loginBtn = document.getElementById("loginGoogle");
-        loginBtn.disabled = true;
-        setAuthStatus("Opening Google sign-in…");
-
-        try {
-            const response = await sendRuntimeMessage({ type: "GOOGLE_SIGN_IN" });
-            if (!response?.ok || !response.emailId) {
-                throw new Error(response?.error || "Sign-in failed.");
-            }
-            setAuthStatus("");
-            showMainView();
-            await loadMainDashboard();
-        } catch (error) {
-            setAuthStatus(error.message, true);
-        } finally {
-            loginBtn.disabled = false;
-        }
+    document.getElementById("loginGoogle").addEventListener("click", () => {
+        return handleLoginGoogleClick();
     });
 
     document.getElementById("signOutBtn").addEventListener("click", async () => {
